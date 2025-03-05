@@ -17,11 +17,13 @@ export class Person {
     email: string;
 
     @Column()
+    password: string;
+
+    @Column()
     picture: string;
 
     @Column({ type: "bytea" })
     biometric_fingerprint: Buffer;
-
 
     @Column({ nullable: true })
     category_id: number;

@@ -3,6 +3,7 @@ import { AppDataSource } from '../data-source';
 import { Person } from '../entity/Person';
 import { Category } from '../entity/Category';
 import { Role } from '../entity/Role';
+import { Encrypt } from '../helpers/encrypt';
 
 export class PersonController {
   
@@ -10,7 +11,16 @@ export class PersonController {
     try {
       const personRepository = AppDataSource.getRepository(Person);
       const persons = await personRepository.find({
-        relations: ['category', 'roles']
+        relations: ['category', 'roles'],
+        select: {
+          id: true,
+          first_name: true, 
+          last_name: true,
+          email: true,
+          picture: true,
+          category_id: true,
+          // Exclude password for security
+        }
       });
       res.json(persons);
     } catch (error) {
@@ -25,7 +35,16 @@ export class PersonController {
       
       const person = await personRepository.findOne({ 
         where: { id },
-        relations: ['category', 'roles']
+        relations: ['category', 'roles'],
+        select: {
+          id: true,
+          first_name: true, 
+          last_name: true,
+          email: true,
+          picture: true,
+          category_id: true,
+          // Exclude password for security
+        }
       });
       
       if (!person) {
@@ -49,16 +68,24 @@ export class PersonController {
         first_name,
         last_name,
         email,
+        password,
         picture,
         biometric_fingerprint,
         category_id,
         role_ids
       } = req.body;
       
+      // Validate required fields
+      if (!first_name || !last_name || !email || !password) {
+        res.status(400).json({ message: 'Missing required fields' });
+        return;
+      }
+      
       const person = new Person();
       person.first_name = first_name;
       person.last_name = last_name;
       person.email = email;
+      person.password = await Encrypt.hashPassword(password);
       
       if (picture) {
         person.picture = picture;
@@ -83,14 +110,25 @@ export class PersonController {
         const roles = await roleRepository.findByIds(role_ids);
         savedPerson.roles = roles;
         await personRepository.save(savedPerson);
+      } else {
+        // Assign default 'user' role if no roles provided
+        const defaultRole = await roleRepository.findOne({ where: { name: 'user' } });
+        if (defaultRole) {
+          savedPerson.roles = [defaultRole];
+          await personRepository.save(savedPerson);
+        }
       }
       
+      // Fetch the complete person with relations
       const result = await personRepository.findOne({
         where: { id: savedPerson.id },
         relations: ['category', 'roles']
       });
       
-      res.status(201).json(result);
+      // Remove password from response
+      const { password: _, ...personData } = result;
+      
+      res.status(201).json(personData);
     } catch (error) {
       if (error.code === '23505') {
         res.status(409).json({ message: 'Person with this email already exists' });
@@ -122,6 +160,7 @@ export class PersonController {
         first_name,
         last_name,
         email,
+        password,
         picture,
         biometric_fingerprint,
         category_id,
@@ -131,6 +170,7 @@ export class PersonController {
       if (first_name) person.first_name = first_name;
       if (last_name) person.last_name = last_name;
       if (email) person.email = email;
+      if (password) person.password = await Encrypt.hashPassword(password);
       if (picture) person.picture = picture;
       if (biometric_fingerprint) person.biometric_fingerprint = biometric_fingerprint;
       
@@ -150,12 +190,16 @@ export class PersonController {
       
       await personRepository.save(person);
       
+      // Fetch updated person with relations
       const result = await personRepository.findOne({
         where: { id },
         relations: ['category', 'roles']
       });
       
-      res.json(result);
+      // Remove password from response
+      const { password: _, ...personData } = result;
+      
+      res.json(personData);
     } catch (error) {
       if (error.code === '23505') {
         res.status(409).json({ message: 'Person with this email already exists' });
@@ -216,7 +260,10 @@ export class PersonController {
         await personRepository.save(person);
       }
       
-      res.json(person);
+      // Remove password from response
+      const { password, ...personData } = person;
+      
+      res.json(personData);
     } catch (error) {
       res.status(500).json({ message: 'Error adding role to person', error });
     }
@@ -242,7 +289,10 @@ export class PersonController {
       person.roles = person.roles.filter(role => role.id !== roleId);
       const result = await personRepository.save(person);
       
-      res.json(result);
+      // Remove password from response
+      const { password, ...personData } = result;
+      
+      res.json(personData);
     } catch (error) {
       res.status(500).json({ message: 'Error removing role from person', error });
     }

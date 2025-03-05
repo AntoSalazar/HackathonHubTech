@@ -1,16 +1,19 @@
 // routes/role.routes.ts
 import { Router } from 'express';
 import { RoleController } from '../controller/RoleController';
+import { authenticate } from '../middleware/authentication';
+import { authorize } from '../middleware/authorization';
 
 const router = Router();
 const controller = new RoleController();
 
-router.get('/', controller.getAll);
-router.get('/:id', controller.getOne);
-router.post('/', controller.create);
-router.put('/:id', controller.update);
-router.delete('/:id', controller.delete);
-router.post('/:id/permissions/:permissionId', controller.addPermission);
-router.delete('/:id/permissions/:permissionId', controller.removePermission);
+// All role routes are protected and require admin access
+router.get('/', authenticate, authorize(['admin']), controller.getAll);
+router.get('/:id', authenticate, authorize(['admin']), controller.getOne);
+router.post('/', authenticate, authorize(['admin']), controller.create);
+router.put('/:id', authenticate, authorize(['admin']), controller.update);
+router.delete('/:id', authenticate, authorize(['admin']), controller.delete);
+router.post('/:id/permissions/:permissionId', authenticate, authorize(['admin']), controller.addPermission);
+router.delete('/:id/permissions/:permissionId', authenticate, authorize(['admin']), controller.removePermission);
 
 export default router;
