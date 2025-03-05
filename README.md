@@ -1,4 +1,4 @@
-# Awesome Project Build with TypeORM
+# Hackathon HubTech 2025 problem
 
 Steps to run this project:
 
