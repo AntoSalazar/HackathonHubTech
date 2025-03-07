@@ -1,0 +1,25 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    ports:
+      - '3000:3000'  # Adjust port as needed
+    depends_on:
+      - postgres
+    #command: 
+    # bash -c "tail -f /dev/null"   Keep container running even if app fails
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/postgres
+      # Add other environment variables your app needs
+
+volumes:
+  postgres-data:

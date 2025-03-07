@@ -1,0 +1,7 @@
+Everything is in the docker cointainer 
+Docker = https://www.docker.com/
+
+
+
+run docker container= docker compose up -d
+stop the container = docker compose down

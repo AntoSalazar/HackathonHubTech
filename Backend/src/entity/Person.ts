@@ -22,8 +22,8 @@ export class Person {
     @Column()
     picture: string;
 
-    @Column({ type: "bytea" })
-    biometric_fingerprint: Buffer;
+    @Column()
+    biometric_fingerprint: String;
 
     @Column({ nullable: true })
     category_id: number;
