@@ -1,0 +1,13 @@
+services:
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Mount a volume for data persistence
+
+volumes:
+  postgres_data:  # Define the volume

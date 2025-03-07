@@ -11,7 +11,8 @@ import categoryRoutes from "./routes/CategoryRoutes"
 import roleRoutes from "./routes/RoleRoutes"
 import permissionRoutes from "./routes/PermissionRoutes"
 import personRoutes from "./routes/PersonRoutes"
-import authRoutes from "./routes/AuthRoutes" // New auth routes
+import authRoutes from "./routes/AuthRoutes" 
+import { Encrypt } from "./helpers/encrypt"
 
 // Import entity classes to ensure they're registered 
 import { Category } from "./entity/Category"
@@ -57,8 +58,13 @@ AppDataSource.initialize().then(async () => {
     app.listen(port)
     console.log(`Express server has started on port ${port}.`)
 
-    // Create default roles and permissions
-    await createDefaultRoles();
+    
+  
+  
+  console.log("Setting up default roles and admin user...");
+  await createDefaultRoles();
+  await createAdminUser();
+  console.log("Setup complete!");
 
 }).catch(error => console.log(error))
 
@@ -156,3 +162,47 @@ async function createDefaultRoles() {
         console.error('Error creating default roles:', error);
     }
 }
+
+
+async function createAdminUser() {
+    try {
+      const personRepository = AppDataSource.getRepository(Person);
+      const roleRepository = AppDataSource.getRepository(Role);
+      
+      // Check if admin user already exists
+      const adminEmail = "admin@admin.com"; // You can change this to your preferred admin email
+      const existingAdmin = await personRepository.findOne({ where: { email: adminEmail } });
+      
+      if (!existingAdmin) {
+        // Find admin role
+        const adminRole = await roleRepository.findOne({ where: { name: 'admin' } });
+        
+        if (!adminRole) {
+          console.error("Admin role not found. Please run createDefaultRoles first.");
+          return;
+        }
+        
+        // Create admin user
+        const adminUser = new Person();
+        adminUser.first_name = "Admin";
+        adminUser.last_name = "User";
+        adminUser.email = adminEmail;
+        adminUser.password = await Encrypt.hashPassword("Password123"); // Change this to a secure password
+        adminUser.picture = "admin.jpg"; // Optional
+        
+        // Save the user first
+        const savedAdmin = await personRepository.save(adminUser);
+        
+        // Assign admin role
+        savedAdmin.roles = [adminRole];
+        await personRepository.save(savedAdmin);
+        
+        console.log(`Admin user created with email: ${adminEmail} and password: Password123`);
+        console.log("IMPORTANT: Please change the admin password after first login!");
+      } else {
+        console.log("Admin user already exists.");
+      }
+    } catch (error) {
+      console.error("Error creating admin user:", error);
+    }
+  }

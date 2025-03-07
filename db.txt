@@ -1,0 +1,41 @@
+Table categories {
+  id integer [primary key]
+  name varchar [unique]
+}
+
+Table roles {
+  id integer [primary key]
+  name varchar [unique]  // e.g., "admin", "user"
+}
+
+Table permissions {
+  id integer [primary key]
+  name varchar [unique] // e.g., "view_dashboard", "manage_users"
+}
+
+Table person {
+  id integer [primary key]
+  first_name varchar
+  last_name varchar
+  email varchar [unique]
+  picture binary
+  biometric_fingerprint binary
+  category_id integer [unique]
+}
+
+Table person_roles {
+  person_id integer
+  role_id integer
+}
+
+Table role_permissions {
+  role_id integer
+  permission_id integer
+}
+
+Ref: person.category_id > categories.id
+Ref: person_roles.person_id > person.id
+Ref: person_roles.role_id > roles.id
+Ref: role_permissions.role_id > roles.id
+Ref: role_permissions.permission_id > permissions.id
+

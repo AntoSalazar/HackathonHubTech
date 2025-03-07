@@ -1,0 +1,35 @@
+Categories
+
+GET /api/categories - Get all categories
+GET /api/categories/:id - Get category by ID
+POST /api/categories - Create a new category
+PUT /api/categories/:id - Update a category
+DELETE /api/categories/:id - Delete a category
+
+Roles
+
+GET /api/roles - Get all roles
+GET /api/roles/:id - Get role by ID
+POST /api/roles - Create a new role
+PUT /api/roles/:id - Update a role
+DELETE /api/roles/:id - Delete a role
+POST /api/roles/:id/permissions/:permissionId - Add a permission to a role
+DELETE /api/roles/:id/permissions/:permissionId - Remove a permission from a role
+
+Permissions
+
+GET /api/permissions - Get all permissions
+GET /api/permissions/:id - Get permission by ID
+POST /api/permissions - Create a new permission
+PUT /api/permissions/:id - Update a permission
+DELETE /api/permissions/:id - Delete a permission
+
+Persons
+
+GET /api/persons - Get all persons
+GET /api/persons/:id - Get person by ID
+POST /api/persons - Create a new person
+PUT /api/persons/:id - Update a person
+DELETE /api/persons/:id - Delete a person
+POST /api/persons/:id/roles/:roleId - Add a role to a person
+DELETE /api/persons/:id/roles/:roleId - Remove a role from a person
