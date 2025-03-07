@@ -189,6 +189,7 @@ async function createAdminUser() {
         adminUser.email = adminEmail;
         adminUser.password = await Encrypt.hashPassword("Password123"); // Change this to a secure password
         adminUser.picture = "admin.jpg"; // Optional
+        adminUser.biometric_fingerprint = "default-fingerprint"; // Or any default value
         
         // Save the user first
         const savedAdmin = await personRepository.save(adminUser);
